@@ -17,13 +17,14 @@ typedef struct
 
 typedef struct
 {
-	int v;
-	int dist;
+	int v1;
+	int v2;
+	double lim_inf;
 } node;	
 
 bool node_comp (node no1, node no2)
 {
-	return (no1.dist > no2.dist);
+	return (no1.lim_inf > no2.lim_inf);
 }
 
 double w (graph* G, int i, int j)
@@ -33,31 +34,34 @@ double w (graph* G, int i, int j)
 
 void mst_prim (graph *G, int root)
 {
-	int *dist = NULL;
+	int *key = NULL;
 	int *parent = NULL;
 	int i = 0, j = 0;
 	std::vector<node> fila;
 	node no_temp;
-	node k;
 
-	dist = new int[G->n];
+	key = new int[G->n];
 	parent = new int[G->n];
 	
 	for (i = 0; i < G->n; i++)
 	{
-		dist[i] = INF;
+		key[i] = INF;
 		parent[i] = -1;
 	}
 
-	dist[root] = 0;
+	key[root] = 0;
 	
 	for (i = 0; i < G->n; i++)
 	{	
-		no_temp.v = i;
-		no_temp.dist = dist[i];
-		fila.push_back(no_temp);
+		for (j = 0; j < G->n; j++)
+		{
+			no_temp.v1 = i;
+			no_temp.v2 = j;
+			no_temp.lim_inf = w(G, i, j);
+			fila.push_back(no_temp);
 
-		std::push_heap(fila.begin(), fila.end(), node_comp);
+			std::push_heap(fila.begin(), fila.end(), node_comp);
+		}
 	}
 
 	while (fila.size() > 0)
@@ -68,13 +72,7 @@ void mst_prim (graph *G, int root)
 
 		for (i = 0; i < G->n; i++)
 		{
-			if (i != no_temp.v)
-			{
-				//  se o nó i está na fila
-				//  e w(no_temp, i) < dist[i]
-				//     parent[i] = no_temp
-				//     dist[i] = w(no_temp, i)
-			}
+			
 		}
 	}
 
