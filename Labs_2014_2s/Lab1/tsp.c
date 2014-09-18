@@ -1,0 +1,340 @@
+
+/*
+   Implemente na função solve o algoritmo branch-and-bound pedido no enunciado.
+
+   Esta função recebe uma instância do TSP cujos dados são armazenados na estrutura de dados
+   definida pelo tipo TSPInstance (veja o arquivo tsp.h).
+   O atribuito n desta estrutura corresponde a quantidade de cidades.
+   O custo da viagem entre as cidades i e j é armazenado na linha i e coluna j da matriz instance->costs,
+   ou seja, em instance->costs[i][j] onde 0 <= i, j <= n-1.
+   
+   Além da instância, esta função também recebe um vetor de n números inteiros
+   onde deve ser armazenada a melhor solução (circuito hamiltoniano) computada.
+   Você pode assumir que o circuito comece em um cidade qualquer.
+   O valor na i-ésima posição do vetor bestSolution deve ser o índice da i-ésima cidade
+   visitada no circuito encontrado.
+   
+   O valor retornado pela função deve ser o custo da solução obtida.
+
+   ATENÇÃO: Não altere os dados da instância pois a mesma é utilizada no programa principal!
+*/
+
+#include "tsp.h"
+
+double get_z (const TSPInstance *instance, const int *partialSolution, int m)
+{
+/* Retorna a distância acumulada na solução parcial partialSolution */
+	
+	int i = 0;
+	double z = 0;
+
+	for (i = 0; i < m-1; i++)
+	{
+		z = z + instance->costs[ partialSolution[i] ][ partialSolution[i+1] ];
+	}	
+
+	return z;
+}
+
+int get_closest (const TSPInstance *instance, const int *partialSolution, int m, int s)
+{
+/* Retorna o vértice mais próximo de s que ainda não está no circuito */
+
+	int i = 0,  j = 0;
+	bool already_in = 0;
+	int closest = -1;
+	double closest_dist = INF;
+
+	for (i = 0; i < instance->n; i++)
+	{
+		already_in = 0;
+		for (j = 0; j < m; j++)
+		{
+			if (partialSolution[j] == i)
+			{
+				already_in = 1;
+			}
+		}
+		if (already_in == 0)
+		{
+			if (closest_dist > instance->costs[s][i])
+			{
+				closest = i;
+				closest_dist = instance->costs[s][i];
+			}
+		}
+	}
+
+	return closest;
+}
+
+double add_u_cost (const TSPInstance *instance, const int *partialSolution, int m)
+{
+/* Retorna o custo de conectar o primeiro vértice do circuito ao vértice mais próximo dele que não faz parte do circuito. */
+
+	int u = -1;
+	int v1 = partialSolution[0];
+
+	u = get_closest(instance, partialSolution, m, v1);
+
+	return instance->costs[u][v1];
+}
+
+double add_w_cost (const TSPInstance *instance, const int *partialSolution, int m)
+{
+/* Retorna o custo de conectar o último vértice do circuito ao vértice mais próximo dele que não faz parte do circuito. */
+
+	int w = -1;
+	int vm = partialSolution[m-1];
+
+	w = get_closest(instance, partialSolution, m, vm);
+
+	return instance->costs[vm][w];
+}
+
+bool node_comp (node no1, node no2)
+{
+	return (no1.dist > no2.dist);
+}
+
+double weight (const TSPInstance *instance, int i, int j)
+{
+	return instance->costs[i][j];
+}
+
+double mst_prim (const TSPInstance *instance, const int *partialSolution, int root)
+{
+	int *dist = NULL;
+	int *parent = NULL;
+	int i = 0;
+	unsigned int j = 0;
+	std::vector<node> heap;
+	node temp_node;
+	//node k;
+	double value = 0;
+	int cur = -1;
+
+	dist = new int[instance->n];
+	parent = new int[instance->n];
+	
+	for (i = 0; i < instance->n; i++)
+	{
+		dist[i] = INF;
+		parent[i] = -1;
+	}
+
+	dist[root] = 0;
+	
+	for (i = 0; i < instance->n; i++)
+	{	
+		temp_node.v = i;
+		temp_node.dist = dist[i];
+		heap.push_back(temp_node);
+
+		std::push_heap(heap.begin(), heap.end(), node_comp);
+	}
+
+	while (heap.size() > 0)
+	{
+		temp_node = heap.front();
+		std::pop_heap(heap.begin(), heap.end(), node_comp);
+		heap.pop_back();
+
+		for (i = 0; i < instance->n; i++)
+		{
+			if (i != temp_node.v)
+			{
+				for (j = 0; j < heap.size(); j++)	//  se o nó i está na fila
+				{
+					if (heap[j].v == i)
+					{
+						if (weight(instance, temp_node.v, i) < dist[i])//  e w(no_temp, i) < dist[i]
+						{
+							parent[i] = temp_node.v;
+							dist[i] = weight(instance, temp_node.v, i);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	
+	for (i = 0; i < instance->n; i++)
+	{	
+		cur = i;	
+		while (cur != root)
+		{
+			value = value + weight(instance, cur, parent[cur]);
+			cur = parent[cur];
+		}
+	}
+
+	std::cout << "MST =" << value;
+	return value;
+}
+
+double leftovers_cost(const TSPInstance *instance, const int *partialSolution, int m, tree_node *node)
+{
+/* Calcula o valor máximo que os vértices faltantes agregarão ao grafo <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<? */
+	
+	int i = 0, j = 0;
+	//node *mst = NULL;
+	//int left_n = 0;
+	int *used = NULL;
+	bool already_in;
+	
+	used = new int[instance->n];
+	for (i = 0; i < instance->n; i++)
+	{
+		already_in = 0;
+		for (j = 0; j < m; j++)
+		{
+			if (partialSolution[j] == i)
+			{
+				already_in = 1;
+			}
+		}
+		if (already_in == 0)
+		{
+			used[i] = 0;
+		}
+		else
+		{
+			used[i] = 1;
+		}
+	}
+
+	//left_n = instance->n - m;
+
+	return mst_prim(instance, partialSolution, 0);
+	
+	//return sum_mst_pri; //asoidjaoidjs j
+}
+
+double calculateLowerBound(const TSPInstance *instance, const int *partialSolution, int m, tree_node *node)
+{
+	float lb = 0;
+
+	// Calcule Z(S) onde S está armazenada em partialSolution e m corresponde à quantidade de vértices em partialSolution
+	lb = lb + node->z;
+	
+	// Calcule c(u,v1) e c(vm,w)
+	lb = lb + add_u_cost(instance, partialSolution, m);
+	lb = lb + add_w_cost(instance, partialSolution, m);
+	
+	// Calcule AGM(V-S)
+	lb = lb + leftovers_cost(instance, partialSolution, m, node);
+	
+	// Retorne Z(S) + c(u,v1) + c(vm,w) + AGM(V-S)
+	return lb;
+}
+
+tree_node *new_tree_node (const TSPInstance *instance, int fixed, tree_node *parent)
+{
+/* Adiciona um nó à árvore */
+	
+	tree_node *node = new tree_node;
+
+	node->sons = new tree_node[instance->n];
+
+	node->added_v = fixed;
+	//root->first_v = s;
+	//root->last_v = s;
+
+	node->level = parent->level + 1;
+
+	node->partialSolution = parent->partialSolution;
+	node->partialSolution[node->level-1] = fixed;
+
+	node->z = parent->z + weight(instance, node->added_v, parent->added_v);
+	node->lower_lim = calculateLowerBound(instance, node->partialSolution, node->level, node);
+
+	return node;
+}
+
+
+tree_node *tree_init (const TSPInstance *instance, int s)
+{
+/*Inicializa a árvore começando o caminho pelo vértice 0 */
+
+	int i = 0;
+	
+	tree_node *root = NULL;
+	
+	root = new tree_node;
+
+	root->sons = new tree_node[instance->n];
+
+	root->added_v = s;
+	//root->first_v = s;
+	//root->last_v = s;
+
+	root->level = 1;
+
+	root->partialSolution = new int[instance->n];
+	root->partialSolution[0] = 0;
+	for(i = root->level; i < instance->n; i++)
+	{
+		root->partialSolution[i] = -1;
+	}
+
+	root->z = 0;
+	root->lower_lim = calculateLowerBound(instance, root->partialSolution, root->level, root);
+
+	return root;
+}
+
+bool tree_node_comp (tree_node node1, tree_node node2)
+{
+/* Retorna a comparação entre os limites inferiores de dois nós da árvore de B&B */
+	return (node1.lower_lim > node2.lower_lim);
+}
+
+double solve(const TSPInstance *instance, int *bestSolution)
+{
+	double bestSolutionCost = DBL_MAX;
+	tree_node *root;
+	std::vector<tree_node> tree_heap;
+	tree_node temp_node;
+//para depois: criar lista ordenada de por proximidade para todos os vértices
+	/* Implemente aqui o algoritmo branch-and-bound */
+	
+	// Escolha um vértice qualquer e crie o nó raiz que representará o circuito parcial contendo apenas o vértice escolhido
+
+	root = tree_init(instance, 0);	
+
+	// Adicione este nó no heap de nós
+
+	tree_heap.push_back(*root);
+	std::push_heap(tree_heap.begin(), tree_heap.end(), tree_node_comp);
+	
+	// Enquanto o heap não estiver vazio
+	while (tree_heap.size() > 0)
+	{
+		// Retire do heap um nó cujo limitante inferior é mínimo
+		temp_node = tree_heap.front();
+		std::pop_heap(tree_heap.begin(), tree_heap.end(), tree_node_comp);
+		tree_heap.pop_back();
+		
+		// Gerar os filhos do nó escolhido e calcular seus limitantes inferiores
+			
+
+		// Verificar se o nó deve ser amadurecido com base no limitante inferior e superior (poda por limitante)
+					
+
+		// Verificar se o nó representa uma solução completa
+			
+	
+			// Caso represente, verificar se esta é melhor que a melhor solução encontrada até o momento
+
+			
+	
+		// Se não houver poda por limitante e a solução não é completa, adicione o nó no heap
+			
+      }
+	return bestSolutionCost;
+}
+
+
+
