@@ -1,0 +1,43 @@
+Problem:    minas
+Rows:       4
+Columns:    3
+Non-zeros:  12
+Status:     OPTIMAL
+Objective:  energia = 32173.91304 (MAXimum)
+
+   No.   Row name   St   Activity     Lower bound   Upper bound    Marginal
+------ ------------ -- ------------- ------------- ------------- -------------
+     1 energia      B        32173.9                             
+     2 restricaoambiental[Enxofre]
+                    NU          2500                        2500       1.73913 
+     3 restricaoambiental[Poeira]
+                    NU           2.8                         2.8       5217.39 
+     4 proporcao    NS             1             1             =       13217.4 
+
+   No. Column name  St   Activity     Lower bound   Upper bound    Marginal
+------ ------------ -- ------------- ------------- ------------- -------------
+     1 x[MorroVelho]
+                    B       0.057971             0               
+     2 x[Monjolo]   B       0.550725             0               
+     3 x[Jabuticaba]
+                    B       0.391304             0               
+
+Karush-Kuhn-Tucker optimality conditions:
+
+KKT.PE: max.abs.err = 3.34e-13 on row 2
+        max.rel.err = 6.67e-17 on row 2
+        High quality
+
+KKT.PB: max.abs.err = 0.00e+00 on row 0
+        max.rel.err = 0.00e+00 on row 0
+        High quality
+
+KKT.DE: max.abs.err = 2.90e-12 on column 3
+        max.rel.err = 5.34e-17 on column 1
+        High quality
+
+KKT.DB: max.abs.err = 0.00e+00 on row 0
+        max.rel.err = 0.00e+00 on row 0
+        High quality
+
+End of output

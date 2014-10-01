@@ -1,0 +1,34 @@
+data;
+
+set F := f1 f2 f3 f4 f5 f6;
+
+param ra := 	f1	0.0865
+		f2	0.095
+		f3	0.1
+		f4	0.0875
+		f5	0.0925
+		f6	0.09;
+
+param pm :=	f1	1
+		f2	1
+		f3	0
+		f4	1
+		f5	0
+		f6	1;
+
+param c :=	f1	1
+		f2	0
+		f3	0
+		f4	1
+		f5	0
+		f6	1;
+
+param val := 750000;
+
+param prop_unic := 0.25;
+
+param prop_10 := 0.5;
+
+param prop_clas := 0.65;
+
+

@@ -1,0 +1,2 @@
+# parâmetro único: nome do arquivo de dados
+glpsol --model cana.mod --data $1 --output cana.opt --wcpxlp cana.lp

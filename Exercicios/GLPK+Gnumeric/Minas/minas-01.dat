@@ -1,0 +1,27 @@
+/** dados do cenario dos slides dados em aula **/
+data;
+
+/* Labels das minas */
+set MINAS := MorroVelho Monjolo Jabuticaba;
+
+/* Subprodutos da queima do carvao */
+set SUBPRODUTOS := Enxofre Poeira Vapor;
+
+/* Subprodutos da queima do carvao nocivos ao meio ambiente */
+set NOCIVOS := Enxofre Poeira;
+
+/* Tabela de subprodutos gerados por queima de uma tonelada de carvao */
+param  tabela :
+
+            Enxofre  Poeira  Vapor :=
+MorroVelho     1100     1.7  24000
+Monjolo        3500     3.2  36000
+Jabuticaba     1300     2.4  28000;
+
+/* Limite de subprodutos nocivos na queima de uma tonelada de carvao */
+param : limites :=
+Enxofre 2500
+Poeira 2.8;
+
+end;
+ 

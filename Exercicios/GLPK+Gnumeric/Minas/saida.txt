@@ -1,0 +1,13 @@
+
+* Energia Maxima = 32173.91 
+
+* Proporcao dos tipos de carvao: 
+  MorroVelho       0.06
+     Monjolo       0.55
+  Jabuticaba       0.39
+
+* Produtos nocivos gerados:
+     Enxofre    2500.00
+      Poeira       2.80
+
+ That's all folks !
