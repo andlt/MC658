@@ -1,0 +1,36 @@
+data; 
+
+set M := 	Morro Velho
+		Monjolo
+		Jabuticaba;
+
+set PRODUTOS :=	Enxofre
+		Poeira
+		Vapor;
+
+set NOCIVOS :=	Enxofre
+		Poeira;
+
+param tabela :
+
+			Enxofre	Poeira	Vapor	:=
+	Morro Velho	1100	1.7	24000
+	Monjolo		3500	3.2	36000
+	Jabuticaba	1300	2.4	28000;
+
+
+/*param e :=	Morro Velho	1100
+		Monjolo		3500
+		Jabuticaba	1300;*/
+
+param e_max :=	2500;
+
+/*param p :=	Morro Velho	1.7
+		Monjolo		3.2
+		Jabuticaba	2.4;*/
+
+param p_max :=	2.8;
+
+/*param v :=	Morro Velho	24000
+		Monjolo		36000
+		Jabuticaba	28000;*/
