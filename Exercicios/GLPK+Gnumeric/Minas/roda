@@ -1,0 +1,2 @@
+# parâmetro único: nome do arquivo de dados
+glpsol --model minas.mod --data $1 --output minas.opt --wcpxlp minas.lp

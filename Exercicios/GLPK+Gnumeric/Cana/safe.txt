@@ -1,0 +1,15 @@
+producaoFazenda[1]=275.00
+producaoFazenda[2]=400.00
+producaoFazenda[3]=300.00
+capacidadeUsina[1]=200.00
+capacidadeUsina[2]=600.00
+capacidadeUsina[3]=225.00
+distancia[1,1]=21.00
+distancia[1,2]=50.00
+distancia[1,3]=40.00
+distancia[2,1]=35.00
+distancia[2,2]=30.00
+distancia[2,3]=22.00
+distancia[3,1]=55.00
+distancia[3,2]=20.00
+distancia[3,3]=25.00
