@@ -151,15 +151,15 @@ double solve(const STPInstance *instance, EdgeList *solution)
 				constraintCoefficients[j] = 1;	
 
 				// Ajusta o índice da variável que será informado à rotina do GLPK
-				constraintIndices[j+n] = getY(k,k0,j, n,t);
+				constraintIndices[j+n+1] = getY(k,k0,j, n,t);
 
 				// Ajusta o coeficiente da variável cujo índice foi definido na linha anterior para ser informado ao GLPK
-				constraintCoefficients[j+n] = -1;
+				constraintCoefficients[j+n+1] = -1;
 			}
 		}
 
 		// Passa ao GLPK a restrição que acabou de ser definida nos vetores constraintIndices e constraintCoefficients
-		glp_set_mat_row(model, constraintNumber, n*2, constraintIndices, constraintCoefficients);
+		glp_set_mat_row(model, constraintNumber, n*2+1, constraintIndices, constraintCoefficients);
 
 		// atualiza o indice da próxima restrição a ser inserida
 		constraintNumber++;
