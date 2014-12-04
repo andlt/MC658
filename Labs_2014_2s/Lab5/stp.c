@@ -78,6 +78,8 @@
 
 #include "stp.h"
 
+#define MAX_ITERATIONS 500
+
 EdgeList* createEmptyEdgeList()
 {
 	EdgeList *list = (EdgeList*)malloc(sizeof(EdgeList));
@@ -349,31 +351,46 @@ double localSearch(const STPInstance *instance, EdgeList *solution, double solut
 	
 	return solutionCost;
 }
-double solve(const STPInstance *instance, EdgeList *solution, int executeLocalSearch)
+double solve(const STPInstance *instance, EdgeList *bestSolution, int executeLocalSearch)
 
 {
-	double solutionCost = 0;
-	
-	solution = NULL;
-	solutionCost = INFINITY;
-	
-	solutionCost = constructSolution(instance, solution, 0);
+	int i = 0; // contadores
+	double bestSolutionCost = INFINITY;
+	EdgeList *solution = NULL;
+	double solutionCost = INFINITY;
+
+	bestSolutionCost = constructSolution(instance, bestSolution, 1);
 
 	// Para cada iteração
-	
+	for (i = 0; i < MAX_ITERATIONS; i++) // 500 iterações
+	{
 		// Construa uma solução de forma aleatória
 		// (utilize a função pronta constructSolution passando o parâmetro random igual a 1).
 		// Não se esqueça que a lista (solution) informada para esta função deve estar alocada e vazia!
+		solution = createEmptyEdgeList();	
+		solutionCost = constructSolution(instance, solution, 1);
 		
 		// Se o parâmetro executeLocalSearch for igual a 1,
 		// execute a busca local na solução encontrada no passo anterior.
+		if (executeLocalSearch == 1)
+		{
+			localSearch(instance, solution, solutionCost);
+		}
 		
 		// Verifique e atualize, caso necessário, se a nova solução obtida é
 		// melhor que a melhor solução encontrada até o momento.
 		// Dica: utilize a função swapEdgeList para colocar em solution
 		// as arestas da nova melhor solução encontrada.
+		if (solutionCost < bestSolutionCost)
+		{
+			
+		}
+
+		// Liberar a memória da solução antiga
+		clearEdgeList(solution);
+	}
 		
-	return solutionCost;
+	return bestSolutionCost;
 }
 
 
