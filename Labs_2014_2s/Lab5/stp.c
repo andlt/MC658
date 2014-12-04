@@ -77,6 +77,7 @@
 */
 
 #include "stp.h"
+#include <list>
 
 #define MAX_ITERATIONS 500
 
@@ -307,83 +308,288 @@ void removeEdgeFromList (const STPInstance *instance, EdgeList *list, int v1, in
 {
 /* Remove da lista list a aresta (v1, v2) */
 
+	EdgeListNode *aux = NULL;
+	EdgeListNode *cur = NULL;
+
+	if (list != NULL)
+	{
+		if (list->edges != NULL)
+		{
+			if ((list->edges->v1 == v1 && list->edges->v2 == v2)
+				|| (list->edges->v1 == v2 && list->edges->v2 == v1))
+			{	
+				aux = list->edges;
+				list->edges = list->edges->next;
+			}
+			else
+			{
+				for (cur = list->edges; cur->next != NULL; cur = cur->next)
+				{
+					if ((cur->next->v1 == v1 && cur->next->v2 == v2)
+						|| (cur->next->v1 == v2 && cur->next->v2 == v1))
+					{	
+						aux = cur->next;
+						cur->next = cur->next->next;
+					}
+				}
+				if ((cur->v1 == v1 && cur->v2 == v2) ||
+					(cur->v1 == v2 && cur->v2 == v1))
+				{
+				}
+			}
+		}
+	}
+
+	free(aux);
+}
+
+void removeEdgeFromList2 (const STPInstance *instance, EdgeList *list, int v1, int v2)
+{
+/* Remove da lista list a aresta (v1, v2) */
+
 	EdgeList *auxList = createEmptyEdgeList();
 	
 	addEdgeToList(auxList, v1, v2);
 
-	copyEdgeListRemovingAndAdding(list, list, auxList, createEmptyEdgeList());
+	copyEdgeListRemovingAndAdding(createEmptyEdgeList(), list, auxList, createEmptyEdgeList());
 
 	free(auxList);
 }
 
+int vertexDegree (const STPInstance *instancem, EdgeList *graph, int v)
+{
+/* Retorna o grau do vértice v */
+
+	int degree = 0;
+	EdgeListNode *auxEdge = NULL;
+
+	for (auxEdge = graph->edges; auxEdge != NULL; auxEdge = auxEdge->next)
+	{
+		if(auxEdge->v1 == v || auxEdge->v2 == v) //adjacentes a v
+		{
+			degree++;
+		}
+	}
+
+	return degree;
+
+}
+
 double localSearch(const STPInstance *instance, EdgeList *solution, double solutionCost)
 {
-/* Busca Local do algoritmo GRASP sugerido */
+/*  Utiliza o algoritmo GRASP sugerido para realizar uma busca local a partir 
+    da solução solution (S*) de custo solutionCost (l*) */
 
-	int i = 0; // contadores
-	EdgeList *newSolution = NULL;
-	double newSolutionCost = INFINITY;
-	EdgeList *newSolutionEdges = NULL;
-	int *flag = NULL;
-	int v1 = -1;
-	int v2 = -1;
-	EdgeList *connectionPath = createEmptyEdgeList();
+	/* Contadores */
+	int i = 0; 		
+	EdgeListNode *auxEdge = NULL;		
 
-	// Passo1: Seja S* a solução recebida na entrada e l* o seu custo.
-	// Passo2: Faça S=S* e l=l*. Crie uma lista Q com as arestas em S.
-	newSolution = duplicateEdgeList(solution);
-	newSolutionCost = solutionCost;
-
-	newSolutionEdges = duplicateEdgeList(newSolution);
-
- 	// Passo3: Retire uma aresta (u,v) de Q.
-	v1 = newSolutionEdges->edges->v1;
-	v2 = newSolutionEdges->edges->v2;
-	removeEdgeFromList(instance, newSolutionEdges, v1, v2);
-
- 	// Passo4: Crie um  vetor flag[]  onde a i-ésima  posição recebe 0 se o vértice i está em S ou -1 caso contrário.
-	flag = new int[instance->n];
-
- 	// Passo5: Faça R = {(u,v)}.
-	addEdgeToList(connectionPath, v1, v2);
-
- 	// Passo6: Faça flag[v] = 1.
- 	// Passo7: Crie  uma  lista Q' com  todos os  vértices  adjacentes a v, exceto u.
- 	// Passo8: Retire um vértice w de Q'.
- 	// Passo9: Faça flag[w] = 1.
- 	// Passo10: Insira em Q' todos os vértices adjacentes a w cuja flag é 0.
- 	// Passo11: Se Q' não estiver vazia, volte ao passo 8.
-
-  	// Passo12: Faça w = u.
- 	// Passo13: Se w é um terminal ou possui  grau diferente de  dois em S, vá para o passo 16.
- 	// Passo14: Faça flag[w] = -1.
- 	// Passo15: Seja w' o único vértice  adjacente a w que  possui  flag 0. Acrescente (w,w') em R, faça w = w' e volte ao passo 13.
-
- 	// Passo16: Faça w = v.
- 	// Passo17: Se w é um  terminal ou  possui grau diferente de dois em S, vá para o passo 20.
- 	// Passo18: Faça flag[w] = -1.
- 	// Passo19: Seja  w' o único  vértice adjacente a w que  possui flag 1.
- 	// Acrescente (w,w') em R, faça w = w' e volte ao passo 17.
-  
- 	// Passo20: Execute  o algoritmo de caminhos  mínimo informando o vetor
-     	   // flag para  encontrar  o caminho de custo  mínimo P que liga
-     	   // as duas subárvores obtidas ao remover de S as arestas em R.
-  
- 	// Passo21: Se o  custo de P for  menor que o custo  total  das arestas
-        	// em R, então  faça uma cópia das  arestas em S que não estão
-           	// em  R e acrescente nesta  cópia as arestas de P.  Seja S' a
-           	// solução  obtida  a  partir  desta  cópia e l'  o seu custo.
-           	// Se l' < l*, faça S*=S' e l*=l'.
-  
- 	// Passo22: Se Q não estiver vazia, volte ao passo 3.
- 	// Passo23: Se   l* < l,   volte   ao   passo   2.    Caso   contrário,
-          	// retorne (S*,l*).
-
-
-	// Ao utilizar a função shortestPath aqui, lembre-se que o parâmetro skip deve ser 0.
+	/* Variáveis Auxiliares */
+	int v1 = -1;	// u			
+	int v2 = -1;	// v
+	int auxVertex = -1;	// w
 	
+	/* Grafos */
+	EdgeList *currentSolution = NULL;	// S
+	double currentSolutionCost = INFINITY;	// l
+	EdgeList *newSolution = NULL;		// S'
+	double newSolutionCost = INFINITY;	// l'
+	EdgeList *connectionPath = NULL;	// R
+	double connectionPathCost = INFINITY;
+	EdgeList *minPath = NULL;		// P
+	double minPathCost = INFINITY;
+	
+	/* Listas */	
+	int *flag = NULL;			// flag		
+	EdgeList *edgesList = NULL;		// Q
+	std::list<int> vertexList; 		// Q'
+
+	/* Passo1: Seja S* a solução recebida na entrada e l* o seu custo. */
+
+	do
+	{
+		/* Passo2: Faça S=S* e l=l*. */
+		currentSolution = duplicateEdgeList(solution);
+		currentSolutionCost = solutionCost;
+
+		/* Crie uma lista Q com as arestas em S. */
+		edgesList = duplicateEdgeList(currentSolution);
+
+		do
+		{
+		 	/* Passo3: Retire uma aresta (u,v) de Q. */
+			v1 = edgesList->edges->v1;
+			v2 = edgesList->edges->v2;
+			removeEdgeFromList(instance, edgesList, v1, v2);
+
+		 	/* Passo4: Crie um  vetor flag[]  onde a i-ésima  posição recebe 0 se o vértice i está em S ou -1 caso contrário. */
+			flag = new int[instance->n];
+			for (i = 0; i < instance->n; i++)
+			{
+				flag[i] = -1;
+			}
+			for (auxEdge = currentSolution->edges; auxEdge != NULL; auxEdge = auxEdge->next)
+			{
+				flag[auxEdge->v1] = 0;
+				flag[auxEdge->v2] = 0;
+			}
+
+		 	/* Passo5: Faça R = {(u,v)}. */
+			if(connectionPath != NULL)
+				free(connectionPath);
+			connectionPath = createEmptyEdgeList();
+			addEdgeToList(connectionPath, v1, v2);
+
+		 	/* Passo6: Faça flag[v] = 1. */
+			flag[v2] = 1;	
+
+		 	/* Passo7: Crie  uma  lista Q' com  todos os  vértices  adjacentes a v, exceto u. */
+			for (auxEdge = currentSolution->edges; auxEdge != NULL; auxEdge = auxEdge->next)
+			{
+				if(auxEdge->v1 != v1 && auxEdge->v2 != v1) // u não está no par?
+				{
+					if(auxEdge->v1 == v2) // v está no par?
+					{
+						vertexList.push_back(v2); //adiciona o outro vértice à lista
+					}
+					else if (auxEdge->v2 == v2) // v está no par?
+					{
+						vertexList.push_back(v1); //adiciona o outro vértice à lista
+					}
+				}
+			}
+
+		 	/* Passo8: Retire um vértice w de Q'. */
+			do
+			{
+				if(!vertexList.empty())
+				{
+					auxVertex = vertexList.front();
+					vertexList.pop_front();
+				}
+
+		 	/* Passo9: Faça flag[w] = 1. */
+				flag[auxVertex] = 1;
+
+		 	/* Passo10: Insira em Q' todos os vértices adjacentes a w cuja flag é 0. */
+				for (auxEdge = currentSolution->edges; auxEdge != NULL; auxEdge = auxEdge->next)
+				{
+					if (auxEdge->v1 == auxVertex) // w está no par ?
+					{
+						if (flag[auxEdge->v2] == 0) // flag 0 ?
+						{
+							vertexList.push_back(auxEdge->v2); // adiciona o outro vértice
+						}
+					}
+					else if (auxEdge->v2 == auxVertex) // w está no par ?
+					{
+						if (flag[auxEdge->v1] == 0) // flag 0 ?
+						{
+							vertexList.push_back(auxEdge->v1); // adiciona o outro vértice
+						}
+					}
+				}
+	
+		 	/* Passo11: Se Q' não estiver vazia, volte ao passo 8. */
+			} while(!vertexList.empty());
+
+		  	/* Passo12: Faça w = u. */
+			auxVertex = v1;
+
+		 	/* Passo13: Se w é um terminal ou possui  grau diferente de  dois em S, vá para o passo 16. */
+			while (!instance->isTerminal[auxVertex] && 
+				vertexDegree(instance, currentSolution, auxVertex) != 2)
+			{
+
+		 	/* Passo14: Faça flag[w] = -1. */
+				flag[auxVertex] = -1;	
+
+		 	/* Passo15: Seja w' o único vértice  adjacente a w que  possui  flag 0. */ 
+				for (i = 0; i < instance->n; i++)
+				{
+					if (flag[i] == 0)
+					{	
+						/* Acrescente (w,w') em R, faça w = w' e volte ao passo 13.*/
+						addEdgeToList(connectionPath, auxVertex, i);
+						auxVertex = i;
+						break;
+					}
+				}
+			}
+
+		 	/* Passo16: Faça w = v. */
+			auxVertex = v2;
+
+		 	/* Passo17: Se w é um  terminal ou  possui grau diferente de dois em S, vá para o passo 20. */
+			while (!instance->isTerminal[auxVertex] && 
+				vertexDegree(instance, currentSolution, auxVertex) != 2)
+			{
+
+		 	/* Passo18: Faça flag[w] = -1. */
+				flag[auxVertex] = -1;	
+
+		 	/* Passo19: Seja w' o único vértice  adjacente a w que  possui  flag 1. */ 
+				for (i = 0; i < instance->n; i++)
+				{
+					if (flag[i] == 1)
+					{	
+						/* Acrescente (w,w') em R, faça w = w' e volte ao passo 13.*/
+						addEdgeToList(connectionPath, auxVertex, i);
+						auxVertex = i;
+						break;
+					}
+				}
+			}
+		 
+		 	/* Passo20: Execute  o algoritmo de caminhos  mínimo informando o vetor
+		     	   flag para  encontrar  o caminho de custo  mínimo P que liga
+		     	   as duas subárvores obtidas ao remover de S as arestas em R. */
+			minPath = createEmptyEdgeList();
+			minPathCost = shortestPath(instance, flag, minPath, 0);
+
+		 	/* Passo21: Se o  custo de P */
+			connectionPathCost = 0;
+			for (auxEdge = connectionPath->edges; auxEdge != NULL; auxEdge = auxEdge->next)
+			{
+				connectionPathCost += instance->costs[auxEdge->v1][auxEdge->v2];
+			}
+
+			/* for menor que o custo  total  das arestas em R, */
+			if (minPathCost < connectionPathCost)
+			{
+				/* então  faça uma cópia das  arestas em S que não estão
+				   em  R e acrescente nesta  cópia as arestas de P.   */
+				newSolution = createEmptyEdgeList();
+				copyEdgeListRemovingAndAdding(newSolution, currentSolution, connectionPath, minPath);
+			}
+
+			/* Seja S' a solução  obtida  a  partir  desta  cópia e l'  o seu custo. */
+			if(newSolution != NULL)
+			{
+				newSolutionCost = 0;
+				for (auxEdge = newSolution->edges; auxEdge != NULL; auxEdge = auxEdge->next)
+				{
+					newSolutionCost += instance->costs[auxEdge->v1][auxEdge->v2];
+				}		
+			}
+
+			/* Se l' < l*, faça S*=S' e l*=l'. */
+			if (newSolutionCost < solutionCost)
+			{
+				solution = newSolution;
+				solutionCost = newSolutionCost;
+			}
+	  
+	 	/* Passo22: Se Q não estiver vazia, volte ao passo 3. */
+		}while (edgesList->edges != NULL);
+
+	 	/* Passo23: Se   l* < l,   volte   ao   passo   2. */ 
+	}while (newSolutionCost < solutionCost);
+
+	/* C aso   contrário, retorne (S*,l*). */
 	return newSolutionCost;
 }
+
 double solve(const STPInstance *instance, EdgeList *solution, int executeLocalSearch)
 
 {
