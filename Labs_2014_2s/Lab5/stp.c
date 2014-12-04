@@ -303,18 +303,62 @@ typedef struct IntListNode
 
 double localSearch(const STPInstance *instance, EdgeList *solution, double solutionCost)
 {
+/* Busca Local do algoritmo GRASP sugerido */
 
-	// Implemente aqui a busca local.
-	
+	// Passo1: Seja S* a solução recebida na entrada e l* o seu custo.
+	// Passo2: Faça S=S* e l=l*. Crie uma lista Q com as arestas em S.
+ 	// Passo3: Retire uma aresta (u,v) de Q.
+  
+ 	// Passo4: Crie um  vetor flag[]  onde a i-ésima  posição recebe 0 se o vértice i está em S ou -1 caso contrário.
+ 	// Passo5: Faça R = {(u,v)}.
+
+ 	// Passo6: Faça flag[v] = 1.
+ 	// Passo7: Crie  uma  lista Q' com  todos os  vértices  adjacentes a v, exceto u.
+ 	// Passo8: Retire um vértice w de Q'.
+ 	// Passo9: Faça flag[w] = 1.
+ 	// Passo10: Insira em Q' todos os vértices adjacentes a w cuja flag é 0.
+ 	// Passo11: Se Q' não estiver vazia, volte ao passo 8.
+
+  	// Passo12: Faça w = u.
+ 	// Passo13: Se w é um terminal ou possui  grau diferente de  dois em S, vá para o passo 16.
+ 	// Passo14: Faça flag[w] = -1.
+ 	// Passo15: Seja w' o único vértice  adjacente a w que  possui  flag 0. Acrescente (w,w') em R, faça w = w' e volte ao passo 13.
+
+ 	// Passo16: Faça w = v.
+ 	// Passo17: Se w é um  terminal ou  possui grau diferente de dois em S, vá para o passo 20.
+ 	// Passo18: Faça flag[w] = -1.
+ 	// Passo19: Seja  w' o único  vértice adjacente a w que  possui flag 1.
+ 	// Acrescente (w,w') em R, faça w = w' e volte ao passo 17.
+  
+ 	// Passo20: Execute  o algoritmo de caminhos  mínimo informando o vetor
+     	   // flag para  encontrar  o caminho de custo  mínimo P que liga
+     	   // as duas subárvores obtidas ao remover de S as arestas em R.
+  
+ 	// Passo21: Se o  custo de P for  menor que o custo  total  das arestas
+        	// em R, então  faça uma cópia das  arestas em S que não estão
+           	// em  R e acrescente nesta  cópia as arestas de P.  Seja S' a
+           	// solução  obtida  a  partir  desta  cópia e l'  o seu custo.
+           	// Se l' < l*, faça S*=S' e l*=l'.
+  
+ 	// Passo22: Se Q não estiver vazia, volte ao passo 3.
+ 	// Passo23: Se   l* < l,   volte   ao   passo   2.    Caso   contrário,
+          	// retorne (S*,l*).
+
+
 	// Ao utilizar a função shortestPath aqui, lembre-se que o parâmetro skip deve ser 0.
 	
 	return solutionCost;
 }
-
 double solve(const STPInstance *instance, EdgeList *solution, int executeLocalSearch)
+
 {
 	double solutionCost = 0;
 	
+	solution = NULL;
+	solutionCost = INFINITY;
+	
+	solutionCost = constructSolution(instance, solution, 0);
+
 	// Para cada iteração
 	
 		// Construa uma solução de forma aleatória
