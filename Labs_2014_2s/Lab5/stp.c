@@ -303,15 +303,42 @@ typedef struct IntListNode
    struct IntListNode *next;
 } IntListNode;
 
+void removeEdgeFromList (const STPInstance *instance, EdgeList *list, int v1, int v2)
+{
+/* Remove da lista list a aresta (v1, v2) */
+
+	EdgeList *auxList = createEmptyEdgeList();
+	
+	addEdgeToList(auxList, v1, v2);
+
+	copyEdgeListRemovingAndAdding(list, list, auxList, createEmptyEdgeList());
+
+	free(auxList);
+}
+
 double localSearch(const STPInstance *instance, EdgeList *solution, double solutionCost)
 {
 /* Busca Local do algoritmo GRASP sugerido */
 
+	int i = 0; // contadores
+	EdgeList *newSolution = NULL;
+	double newSolutionCost = INFINITY;
+	EdgeList *newSolutionEdges = NULL;
+	int *flag = NULL;
+
 	// Passo1: Seja S* a solução recebida na entrada e l* o seu custo.
 	// Passo2: Faça S=S* e l=l*. Crie uma lista Q com as arestas em S.
+	newSolution = duplicateEdgeList(solution);
+	newSolutionCost = solutionCost;
+
+	newSolutionEdges = duplicateEdgeList(newSolution);
+
  	// Passo3: Retire uma aresta (u,v) de Q.
-  
+	removeEdgeFromList(instance, newSolutionEdges, newSolutionEdges->edges->v1, newSolutionEdges->edges->v2);
+
  	// Passo4: Crie um  vetor flag[]  onde a i-ésima  posição recebe 0 se o vértice i está em S ou -1 caso contrário.
+	flag = new int[instance->n];
+
  	// Passo5: Faça R = {(u,v)}.
 
  	// Passo6: Faça flag[v] = 1.
@@ -349,17 +376,17 @@ double localSearch(const STPInstance *instance, EdgeList *solution, double solut
 
 	// Ao utilizar a função shortestPath aqui, lembre-se que o parâmetro skip deve ser 0.
 	
-	return solutionCost;
+	return newSolutionCost;
 }
-double solve(const STPInstance *instance, EdgeList *bestSolution, int executeLocalSearch)
+double solve(const STPInstance *instance, EdgeList *solution, int executeLocalSearch)
 
 {
 	int i = 0; // contadores
-	double bestSolutionCost = INFINITY;
-	EdgeList *solution = NULL;
 	double solutionCost = INFINITY;
+	EdgeList *newSolution = NULL;
+	double newSolutionCost = INFINITY;
 
-	bestSolutionCost = constructSolution(instance, bestSolution, 1);
+	solutionCost = constructSolution(instance, solution, 1);
 
 	// Para cada iteração
 	for (i = 0; i < MAX_ITERATIONS; i++) // 500 iterações
@@ -367,30 +394,32 @@ double solve(const STPInstance *instance, EdgeList *bestSolution, int executeLoc
 		// Construa uma solução de forma aleatória
 		// (utilize a função pronta constructSolution passando o parâmetro random igual a 1).
 		// Não se esqueça que a lista (solution) informada para esta função deve estar alocada e vazia!
-		solution = createEmptyEdgeList();	
-		solutionCost = constructSolution(instance, solution, 1);
+		newSolution = createEmptyEdgeList();	
+		newSolutionCost = constructSolution(instance, newSolution, 1);
 		
 		// Se o parâmetro executeLocalSearch for igual a 1,
 		// execute a busca local na solução encontrada no passo anterior.
 		if (executeLocalSearch == 1)
 		{
-			localSearch(instance, solution, solutionCost);
+			localSearch(instance, newSolution, newSolutionCost);
 		}
 		
 		// Verifique e atualize, caso necessário, se a nova solução obtida é
 		// melhor que a melhor solução encontrada até o momento.
 		// Dica: utilize a função swapEdgeList para colocar em solution
 		// as arestas da nova melhor solução encontrada.
-		if (solutionCost < bestSolutionCost)
+		if (newSolutionCost < solutionCost)
 		{
-			
+			swapEdgeLists(newSolution, solution);
+			solutionCost = newSolutionCost;
 		}
 
 		// Liberar a memória da solução antiga
-		clearEdgeList(solution);
+		clearEdgeList(newSolution);
+		newSolutionCost = INFINITY;
 	}
 		
-	return bestSolutionCost;
+	return solutionCost;
 }
 
 
