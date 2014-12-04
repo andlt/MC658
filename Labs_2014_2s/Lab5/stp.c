@@ -325,6 +325,9 @@ double localSearch(const STPInstance *instance, EdgeList *solution, double solut
 	double newSolutionCost = INFINITY;
 	EdgeList *newSolutionEdges = NULL;
 	int *flag = NULL;
+	int v1 = -1;
+	int v2 = -1;
+	EdgeList *connectionPath = createEmptyEdgeList();
 
 	// Passo1: Seja S* a solução recebida na entrada e l* o seu custo.
 	// Passo2: Faça S=S* e l=l*. Crie uma lista Q com as arestas em S.
@@ -334,12 +337,15 @@ double localSearch(const STPInstance *instance, EdgeList *solution, double solut
 	newSolutionEdges = duplicateEdgeList(newSolution);
 
  	// Passo3: Retire uma aresta (u,v) de Q.
-	removeEdgeFromList(instance, newSolutionEdges, newSolutionEdges->edges->v1, newSolutionEdges->edges->v2);
+	v1 = newSolutionEdges->edges->v1;
+	v2 = newSolutionEdges->edges->v2;
+	removeEdgeFromList(instance, newSolutionEdges, v1, v2);
 
  	// Passo4: Crie um  vetor flag[]  onde a i-ésima  posição recebe 0 se o vértice i está em S ou -1 caso contrário.
 	flag = new int[instance->n];
 
  	// Passo5: Faça R = {(u,v)}.
+	addEdgeToList(connectionPath, v1, v2);
 
  	// Passo6: Faça flag[v] = 1.
  	// Passo7: Crie  uma  lista Q' com  todos os  vértices  adjacentes a v, exceto u.
