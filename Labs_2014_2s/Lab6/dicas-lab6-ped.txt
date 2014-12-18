@@ -1,0 +1,30 @@
+
+Passo 1:
+
+  Calcule um caminho mínimo entre cada par de vértices do grafo original.
+
+  (Use Floyd-Warshall, guarde a matriz de custos e os caminhos)
+
+Passo 2:
+
+  Calcule uma árvore geradora mínima (AGM) considerando o grafo completo
+  formado pelos vértices terminais cujos custos das arestas são os custos
+  dos caminhos mínimos entre os terminais.
+
+  (Use o algoritmo de Prim com a fila de prioridade implementada com vetor.
+   Inclua apenas os vértices terminais na fila de vértices e utilize
+   a matriz de custos obtida no passo 1.)
+
+Passo 3:
+
+  Seja P o conjunto de caminhos mínimos (obtidos no primeiro passo) que
+  correspondem às arestas da AGM calculada no segundo, e V' o conjunto
+  de vértices que estão em ao menos um dos caminhos em P.
+
+  Encontre e retorne a AGM no subgrado induzido do grafo original pelo
+  conjunto de vertíces V'.
+  
+  (Execute o algoritmo de Prim no grafo original incluíndo na fila de
+   vértices apenas os vértices em V'.)
+
+
