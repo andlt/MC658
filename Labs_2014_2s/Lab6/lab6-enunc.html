@@ -1,0 +1,147 @@
+1;2c<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-->
+<html><head>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   <meta name="GENERATOR" content="Mozilla/4.05 [en] (X11; I; SunOS 5.5 sun4m) [Netscape]">
+<title>MC658 - Projeto e Análise de Algoritmos III - 2014s2 - Lab 6</title>
+</head>
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-->
+
+<body>
+<pre>
+**********************************************************************
+MC658 - Projeto e Análise de Algoritmos III
+Professor: Cid C. de Souza 
+PED: Lucas de Oliveira
+2º semestre de 2014
+
+Laboratório 6: 18/12/2014
+**********************************************************************
+
+O problema da árvore de Steiner (STP) é um problema em grafos que visa
+encontrar  uma  árvore   de  menor  custo  que   conecta  um  conjunto
+pré-determinado de  vértices. Este problema é  definido formalmente da
+seguinte  forma.  Seja  G=(V,E) um  grafo não  orientado, onde  V é  o
+conjunto de vértices e E é o  conjunto de arestas, T um subconjunto de
+vértices (chamados  de terminais) e  c(i,j) uma função que  associa um
+custo positivo para cada  aresta (i,j) em E. O objetivo deste problema
+é encontrar  uma  árvore  em G de  custo  mínimo que  contém  todos os
+vértices em T.
+
+Neste  laboratório a  sua  tarefa será  implementar  um algoritmo  que
+produz uma 2-aproximação  do STP, isto é, uma solução  cujo custo é no
+máximo  o  dobro do  custo  ótimo.   O  algoritmo de  2-aproximação  é
+composto  pelos seguintes  passos.  Crie  um grafo  G'=(T,E') completo
+contendo somente  os vértices terminais  presentes em G.  Associe para
+cada aresta (u,v) em E' o custo de um caminho mínimo entre u e v em G.
+Desta forma,  cada aresta  em G' representará um  caminho mínimo entre
+dois terminais em G. Feito isso, encontre uma árvore geradora mínima A
+em G'. Seja V'' o subconjunto de V formado pelos vértices que estão em
+ao menos  um dos  caminhos mínimos  representados pelas arestas em  A,
+e E''  o subconjunto de  E formado pelas  arestas cujos vértices estão
+em V''.   Crie um grafo  G''=(V'',E'') e  encontre uma árvore geradora
+mínima A' em G''. A árvore A' é uma solução 2-aproximada para o STP.
+
+O trabalho deve ser feito integralmente em sala de aula até às <b><font color="red">16h.</b></font>
+
+----------------------------------------------------------------------
+* Sobre os arquivos fornecidos:
+
+O programa fornecido está escrito em linguagem C e se chama stp.c. Ele
+vem acompanhado de um arquivo denominado stp.h onde estão definidos os
+tipos de  dados usados e  os protótipos de  todas as funções  que você
+deverá implementar e que serão usadas no programa principal. Você deve
+implementar  as rotinas  em C  ou em  C++ partindo  inicialmente deste
+código.
+
+O  programa  principal,  cujo  código  fonte se  encontra  no  arquivo
+denominado  main.c,  já possui  as  rotinas  que  fazem a  leitura  da
+instância  para uma  estrutura  de dados  passada  como parâmetro  nas
+funções que devem  ser programadas por você. Além  disso, as saídas do
+programa  também  já estão  implementadas,  e  incluem  uma rotina  de
+verificação que atesta se a solução encontrada está, de fato, correta.
+Desta forma, você  deve se preocupar apenas em  desenvolver os métodos
+pedidos no arquivo stp.c.
+<b><font color="red">
+O arquivo main.c não deve ser modificado em hipótese alguma.
+</font></b>
+Também é fornecido  um arquivo Makefile que fará toda  a compilação do
+seu programa. Este arquivo está  ajustado para compilar o seu programa
+exibindo todos os avisos de possíveis erros (-Wall) e gerar um arquivo
+executável denominado stp.   Se o seu programa for  implementado em C,
+utilize o  comando "make c"  para gerar  o binário stp  otimizado para
+execução, e  o comando "make  c-debug" para gerar o  binário preparado
+para ser  depurado pelo GDB. De  forma análoga, se você  implementar o
+código em C++, utilize os comandos "make cpp" e "make cpp-debug".
+
+----------------------------------------------------------------------
+* Sobre os programas a serem entregues:
+
+Todos  os  programas  deverão  ser  escritos  em  linguagem C ou C++ e 
+compiláveis em ambiente Linux usando o compilador gcc ou g++.
+
+Conforme dito  acima, limite-se  a codificar  as rotinas  nos arquivos
+stp.c  e stp.h.   Estes serão  os únicos  arquivos de  código a  serem
+entregues.
+
+----------------------------------------------------------------------
+* Arquivos de teste:
+
+São  fornecidos  10 arquivos  de  entrada  para  você testar  as  suas
+funções.  Você pode  conferir a qualidade  das soluções  obtidas pelas
+suas  implementações  comparando  os  seus  resultados  com  os custos
+totais das soluções ótimas de cada instância reproduzidos logo abaixo.
+Note que o  custo da solução obtida  pelo seu algoritmo  jamais poderá
+exceder duas vezes o custo ótimo.
+
+ Instância       Custo Ótimo       2 * Custo Ótimo                                              
+  stp4                6.93               13.86
+  stp10             201.79              403.58
+  stp15             140.48              280.96
+  stp20             135.64              271.28
+  cc3-4p           1725.00             3450.00
+  cc3-4u             19.00               38.00
+  cc3-5p           3661.00             7322.00
+  cc3-5u             36.00               72.00
+  berlin52          844.00             1688.00
+  brasil58         9323.00            18646.00
+
+Na  avaliação  do  trabalho,  o  docente  também  poderá  usar  outras
+instâncias de teste além destas que estão sendo disponibilizadas.
+
+----------------------------------------------------------------------
+* Entrega do trabalho:
+
+Ao  final da  aula do  dia 18/12/2014,  você deve  entregar apenas  os
+arquivos  stp.c  e  stp.h  com  o algoritmo aproximativo  implementado
+corretamente.
+
+----------------------------------------------------------------------
+* Forma de entrega e avaliação:
+<b><font color="red">
+Você deve enviar em uma mensagem  por email ao docente, COM CÓPIA PARA
+O PED, com os arquivos stp.c e stp.h até às 16:00 horas do dia 18/12.</font></b>
+
+A partir deste  horário, a sua nota será  multiplicada por um <i>fator
+de redução</i> que, para um trabalho entregue com até <i>h</i> (número inteiro) 
+horas de atraso, será dado por <i>(10-h)/10</i>.
+
+O email enviado ao docente  ***E AO PED*** deverá OBRIGATORIAMENTE ter
+o seguinte ASSUNTO (SUBJECT):
+
+"MC658 - Lab 6: RAxxxxxx", 
+
+onde xxxxxx corresponde ao seu RA.   Os arquivos stp.c e stp.h deverão
+vir anexos e não no corpo da mensagem.
+
+----------------------------------------------------------------------
+
+* Download dos arquivos: <a href="mc658-lab6.tgz">mc658-lab6.tgz</a>. Aqui se encontram os arquivos
+main.c, stp.c, stp.h, e  o diretório "instances" com as dez instâncias
+de teste (arquivos com extensão ".dat").
+
+* <a href="dicas-lab6-ped.txt">Dicas do Lucas</a>
+
+
+</pre>
+
+</body></html>
