@@ -176,6 +176,9 @@ void setTerminalMST (const STPInstance *instance, int *terminalMST, int *termina
 	}
 
 	terminalMST = new int[n]; // terminalMST[i] = -9 se i é a raíz da MST, -1 se i não é terminal e x se x é o terminal pai de i na MST 
+
+	// O programa não está funcionado porque terminalMST continua == NULL após esta linha; não consegui corrigir.
+
 	for (i = 0; i < n; i++)
 	{
 		terminalMST[i] = -1; /* Nenhum vértice possui pais na MST */
@@ -195,20 +198,24 @@ void setTerminalMST (const STPInstance *instance, int *terminalMST, int *termina
 	}
 }
 
-void fillSolutionWithPath (const STPInstance *instance, EdgeList *solution, double *minPath, int *predecessor, int *terminalMST, int father, int son)
+void fillSolutionWithPath (const STPInstance *instance, EdgeList *solution, double *solutionCost, double *minPath, int *predecessor, int *terminalMST, int father, int son)
 {
 /* Adiciona os vértices que compõem o caminho mínimo de father até son na solução */
 
 	int vertex = -1;
+	int nextVertex = -1;
 	const int n = instance->n;
 
-	for (vertex = son; vertex != father; vertex = predecessor[vertex*n+father])
+	for (vertex = son; vertex != father; vertex = nextVertex)
 	{
-		//
+		// não será a solução correta pois precisaríamos testar se a aresta já está na solução, ou mudar a forma de preenchemento desta (Prim)
+			nextVertex = predecessor[vertex*n+father];
+			addEdgeToList(solution, vertex, nextVertex);
+			*solutionCost = *solutionCost + instance->costs[vertex][nextVertex];	
 	}
 }
 
-void fillSolutionWithPaths (const STPInstance *instance, EdgeList *solution, double *minPath, int *predecessor, int *terminalMST)
+void fillSolutionWithPaths (const STPInstance *instance, EdgeList *solution, double *solutionCost, double *minPath, int *predecessor, int *terminalMST)
 {
 /* Adiciona os vértices que compõem o caminho mínimo de father até son na solução */
 
@@ -222,7 +229,7 @@ void fillSolutionWithPaths (const STPInstance *instance, EdgeList *solution, dou
 		if (terminalMST[i] != -1 &&terminalMST[i] != ROOT_CODE)
 		{
 			/* Adiciona as arestas que compõem aquele caminho à solução */
-			fillSolutionWithPath (instance, solution, minPath, predecessor, terminalMST, i, terminalMST[i]);
+			fillSolutionWithPath (instance, solution, solutionCost, minPath, predecessor, terminalMST, i, terminalMST[i]);
 		}
 	}
 }
@@ -245,7 +252,7 @@ double solve (const STPInstance *instance, EdgeList *solution)
 
 	/* Para cada vértice em terminalMST, adiciona o caminho correspondente à solução */
 
-	fillSolutionWithPaths(instance, solution, minPath, predecessor, terminalMST);
+	fillSolutionWithPaths(instance, solution, &solutionCost, minPath, predecessor, terminalMST);
 
 	return solutionCost;
 }
