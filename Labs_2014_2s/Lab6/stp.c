@@ -24,8 +24,10 @@
 
 #include "stp.h"
 #include <vector>
+#include <stdio.h>
 
 #define INF 99999
+#define ROOT_CODE -9 // código para raízes da terminalMST. Deve ser <= -2
 
 typedef struct
 {
@@ -54,7 +56,7 @@ void addEdgeToList(EdgeList *list, int v1, int v2)
 
 void floydWarshall (const STPInstance *instance, double * minPath, int * predecessor)
 {
-/* Guarda no apontador minPath um vetor com n^2 posições, onde minPath[i*n+j] é a distância do caminho mínimo entre os vértices i e j vértices do grafo recebido em STPInstance. Guarda em predecessor o primeiro elemento do caminho mínimo entre i e j. */
+/* Guarda no apontador minPath um vetor com n^2 posições, onde minPath[i*n+j] é a distância do caminho mínimo entre os vértices i e j vértices do grafo recebido em STPInstance, e predecessor[i*n+j] é o primeiro elemento do caminho mínimo entre i e j. */
 
 	int i = 0;
 	int j = 0;
@@ -91,141 +93,159 @@ void floydWarshall (const STPInstance *instance, double * minPath, int * predece
 	}
 }
 
-/*void vertexQueueInit(vector<vertex> vertexQueue, double *dist)
+void terminalToVertex (const STPInstance *instance, int *index)
 {
+/* Traduz o índice index de terminal (1 a t) para vértice (1 a n) */
+
+	*index = instance->terminals[*index];
+}
+
+void getNextFatherSon (const STPInstance *instance, bool *terminalInTree, int *father, int *son)
+{
+/* Encontra o par father (terminal presente na terminalMST) e son (terminal ausente) com menor custo mínimo */
 	
-}*/
-
-double extractMinEdgeQueue (const STPInstance *instance, int *queueV1, int *queueV2, double *queueVal, bool *queueOnOff, int queueSize, int *edgeV1, int *edgeV2)
-{
-/* */
-
-	int i = 0;
-	int minIndex = -1;
-	double minVal = INF;
-
-	for (i = 0; i < queueSize; i++)
-	{
-		if (queueOnOff[i] == true)
-		{
-			if (queueVal[i] < minVal)
-			{
-				minIndex = i;
-				minVal = queueVal[i];
-			}
-		}
-	}
-
-	if (minIndex != -1)
-	{
-		*edgeV1 = queueV1[minIndex];
-		*edgeV2 = queueV2[minIndex];	
-		queueOnOff[minIndex] = false;
-	}
-	else
-	{
-		edgeV1 = NULL;
-		edgeV2 = NULL;
-	}
-	return minVal;
-
-};
-
-int getNextVertex (const STPInstance *instance, int *queueVertex, bool *vertexInTree, int queueSize)//, int *vertex1, int *vertex2)
-{
-/* */
-
 	int i = 0;
 	int j = 0;
-	//int minIndex = -1;
-	int minCost = INF;
-	int nextVertex = -1;
+	int vertexI = -1;
+	int vertexJ = -1;
+	const int t = instance->t;
+	int currentFather = -1;
+	int currentSon = -1;
+	double minCost = INF;
 
-	for (i = 0; i < queueSize; i++)
+	/* para cada par de terminais com um na MST e outro fora */
+	for (i = 0; i < t; i++)
 	{
-		if (vertexInTree[i] == true)
+		if (terminalInTree[i] == true)
 		{
 			for (j = 0; j < t; j++)
 			{
-				if (vertexInTree[j] == false)
+				if (terminalInTree[j] == false)
 				{
-					if (instance->costs[i][j] < minCost)
+					/* converte os índices de terminal para vértice */
+					vertexI = instance->terminals[i];
+					vertexJ = instance->terminals[j];
+					/* se o caminho mínimo entre eles for o melhor até agora */
+					if (instance->costs[vertexI][vertexJ] < minCost)
 					{
-						nextVertex = j
-						minCost = instance->costs[i][j];
+						/* guarda o par */
+						currentFather = vertexI;
+						currentSon = vertexJ;
 					}
 				}
 			}
 		}
 	}
 
-	return nextVertex;
-};
+	/* seta father e son para o melhor par encontrado */
+	*father = currentFather;
+	*son = currentSon;
+}
 
-void prim (const STPInstance *instance, double *dist)
+void addNextTerminalMST (const STPInstance *instance, int *terminalMST, int *terminalMSTroot, bool *terminalInTree)
 {
-/* */	
+/* Adiciona na Árvore Geradora Mínima de terminais o terminal fora dela com menor caminho mínimo para um terminal que já está na MST */
+
+	int father = -1; // índice (de 1 a n) do terminal na MST com menor caminho mínimo para um fora dela
+	int son = -1; // índice (de 1 a n) do terminal fora da MST com menor caminho mínimo para um nela
+
+	/* Encontra a próxima aresta a ser adicionada à MST (par father e son) */
+
+	getNextFatherSon(instance, terminalInTree, &father, &son);
+
+	/* Traduz o índice de father e son de terminais (1 a t) para vértices (1 a n) */
+	//terminalToVertex(instance, &father);
+	//terminalToVertex(instance, &son);
+
+	terminalMST[son] = father;
+}
+
+void setTerminalMST (const STPInstance *instance, int *terminalMST, int *terminalMSTroot)
+{
+/* Obtem a Árvore Geradora Mínima do grafo formado pelos terminais, abstraindo os vértices entre eles (consideramos o o peso da aresta entre eles como o peso do caminho mínimo entre eles*/
 
 	int i = 0;
-	int j = 0;
-	//int k = 0;
-	int n = instance->n;
-	int t = instance->t;
-	int * father = NULL;
-	int nextVertex = -1; //int * edgeV1 = NULL;
-	//int * edgeV2 = NULL;
-	//int * queueV1 = NULL;
-	//int * queueV2 = NULL;
-	//int * queueVal = NULL; //double * queueVal = NULL;
-	bool * vertexInTree = NULL;
-
-	father = new int[n];
-	//queueV1 = new int[t*t];
-	//queueV2 = new int[t*t];
-	//queueVal = new int[t*t]; //queueVal = new double[t*t];
-	vertexInTree = new bool[t];//*t];
-
-	for (i = 0; i < n; i++)
-	{
-		father[i] = -1;
-	}
-
-	/* Inicializa a fila de prioridade */
+	const int n = instance->n;
+	const int t = instance->t;
+	int usedTerminals = 0; // número de terminais adicionados à MST
+	bool *terminalInTree = new bool[t]; // terminalInTree[i] = true se o terminal [i] está na árvore
+	
 	for (i = 0; i < t; i++)
 	{
-		/*for (j = 0; j < t; j++)
-		{
-			queueV1[i*t+j] = i;
-			queueV2[i*t+j] = j;
-			queueVal[i*t+j] = instance->costs[i][j];
-			queueOnOff[i*t+j] = true;
-		}*/
-		queueVal[i*t+j] = i;
+		terminalInTree[i] = false; /* Nenhum terminal está na MST */
 	}
 
-	nextVertex = extractMin(instance, queueVal, queueOnOff, t);//extractMinEdgeQueue(instance, queueV1, queueV2, queueVal, queueOnOff, t*t, edgeV1, edgeV2);
-	//while (edgeV1 != NULL && edgeV2 != NULL)
+	terminalMST = new int[n]; // terminalMST[i] = -9 se i é a raíz da MST, -1 se i não é terminal e x se x é o terminal pai de i na MST 
+	for (i = 0; i < n; i++)
 	{
-		
-		//extractMin(instance, queueV1, queueV2, queueVal, queueOnOff, t*t, edgeV1, edgeV2);
+		terminalMST[i] = -1; /* Nenhum vértice possui pais na MST */
+	}
+
+	/* Criamos a raíz e colocamos na MST */
+	*terminalMSTroot = instance->terminals[0]; // tomamos o primeiro terminal como raíz
+	terminalInTree[0] = true;
+	terminalMST[*terminalMSTroot] = ROOT_CODE;
+	usedTerminals++;
+
+	/* Enquanto todos os terminais não estiverem na raíz, adiciona o terminal mais próximo de um elemento da raíz a ela */
+	while (usedTerminals < instance->t)
+	{	
+		addNextTerminalMST(instance, terminalMST, terminalMSTroot, terminalInTree);
+		usedTerminals++;
 	}
 }
 
-double solve(const STPInstance *instance, EdgeList *solution)
+void fillSolutionWithPath (const STPInstance *instance, EdgeList *solution, double *minPath, int *predecessor, int *terminalMST, int father, int son)
+{
+/* Adiciona os vértices que compõem o caminho mínimo de father até son na solução */
+
+	int vertex = -1;
+	const int n = instance->n;
+
+	for (vertex = son; vertex != father; vertex = predecessor[vertex*n+father])
+	{
+		//
+	}
+}
+
+void fillSolutionWithPaths (const STPInstance *instance, EdgeList *solution, double *minPath, int *predecessor, int *terminalMST)
+{
+/* Adiciona os vértices que compõem o caminho mínimo de father até son na solução */
+
+	int i = 0;
+	const int n = instance->n;
+
+	/* Para cada vértice da MST */
+	for (i = 0; i < n; i++)
+	{
+		/* Se é um terminal e não é a raíz */
+		if (terminalMST[i] != -1 &&terminalMST[i] != ROOT_CODE)
+		{
+			/* Adiciona as arestas que compõem aquele caminho à solução */
+			fillSolutionWithPath (instance, solution, minPath, predecessor, terminalMST, i, terminalMST[i]);
+		}
+	}
+}
+
+double solve (const STPInstance *instance, EdgeList *solution)
 {
 	double solutionCost = 0;
 	double * minPath = NULL; // minPath[i*n+j] = valor do caminho mínimo entre os vértices i e j
 	int * predecessor = NULL; // predecessor[i*n+j] = próximo vértice no caminho mínimo entre i e j
+	int * terminalMST = NULL; // terminalMST[i] = ROOT_CODE se i é a raíz da MST, -1 se i não é terminal e x se x é o terminal pai de i na MST 
+	int terminalMSTroot = -1;
 
-	/* Algoritmo de Floyd-Warshal */
+	/* Calcula o caminho mínimo entre cada par de vértices */
 
 	floydWarshall(instance, minPath, predecessor);
 		
-	/* Algoritmo de Prim */
+	/* Obtem a Árvore Geradora Mínima do grafo formado pelos terminais, abstraindo os vértices entre eles (consideramos o o peso da aresta entre eles como o peso do caminho mínimo entre eles*/
 
-	
+	setTerminalMST(instance, terminalMST, &terminalMSTroot);
 
-	/* Algoritmo de Prim */
+	/* Para cada vértice em terminalMST, adiciona o caminho correspondente à solução */
+
+	fillSolutionWithPaths(instance, solution, minPath, predecessor, terminalMST);
 
 	return solutionCost;
 }
